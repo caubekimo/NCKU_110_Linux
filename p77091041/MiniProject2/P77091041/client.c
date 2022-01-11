@@ -94,3 +94,4 @@ int main(int argc, char const *argv[])
 }
 
 // https://riptutorial.com/c/example/8274/get-lines-from-a-file-using-getline--
+// https://www.geeksforgeeks.org/socket-programming-cc/
