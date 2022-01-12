@@ -7,8 +7,8 @@
 #include <string.h>
 #define PORT 8080
 #define _GNU_SOURCE
-#define EXIT_FAILURE 1
-#define EXIT_SUCCESS 0
+// #define EXIT_FAILURE 1
+// #define EXIT_SUCCESS 0
 #define FILENAME "./in"
 
 int main(int argc, char const *argv[])
@@ -18,6 +18,7 @@ int main(int argc, char const *argv[])
 	char *hello = "Hello from client";
 	char buffer[1024] = {0};
 
+	/* Sleep 500ms */
     usleep(500000);
 
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -45,30 +46,33 @@ int main(int argc, char const *argv[])
 	/* Open the file for reading */
 	char *line_buf = NULL;
 	size_t line_buf_size = 0;
-	int line_count = 0;
 	ssize_t line_size;
+	int line_count = 0;
 	FILE *fp = fopen(FILENAME, "r");
 
+	/* Exit if file can't be opened */
 	if (!fp)
 	{
 		fprintf(stderr, "Error opening file '%s'\n", FILENAME);
 		return EXIT_FAILURE;
 	}
 
-	/* Get the first line of the file. */
+	/* Get the first line of the file */
 	line_size = getline(&line_buf, &line_buf_size, fp);
 
-	/* Loop through until we are done with the file. */
-	while (line_size >= 0)
+	/* Loop through until we are done with the file */
+	while (line_size > 1)
 	{
 		/* Increment our line count */
 		line_count++;
 
-		//printf(line_buf);
+		/* Show the line details */
+    	// printf("line[%06d]: chars=%06zd, buf size=%06zu, contents: %s", line_count, line_size, line_buf_size, line_buf);
+
 		/* Call server */
-		send(sock , line_buf , strlen(line_buf) , 0 );
-		valread = read(sock , buffer, 1024);
-		printf("%s\n",buffer );
+		send(sock, line_buf, strlen(line_buf), 0);
+		valread = read(sock, buffer, 1024);
+		printf("%s",buffer);
 
 		/* Get the next line */
 		line_size = getline(&line_buf, &line_buf_size, fp);
@@ -78,7 +82,7 @@ int main(int argc, char const *argv[])
 	free(line_buf);
 	line_buf = NULL;
 
-	/* Close the file now that we are done with it */
+	/* Close the file */
 	fclose(fp);
 
 	return EXIT_SUCCESS;
