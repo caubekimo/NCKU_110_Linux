@@ -18,7 +18,7 @@ int main(int argc, char const *argv[])
 	char *hello = "Hello from client";
 	char buffer[1024] = {0};
 
-	usleep(500000);
+    usleep(500000);
 
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
@@ -64,11 +64,11 @@ int main(int argc, char const *argv[])
 		/* Increment our line count */
 		line_count++;
 
+		//printf(line_buf);
 		/* Call server */
-		// printf("line[%06d]: chars=%06zd, buf size=%06zu, contents: %s", line_count,
-		// 	line_size, line_buf_size, line_buf);
-
-		printf(line_buf);
+		send(sock , line_buf , strlen(line_buf) , 0 );
+		valread = read(sock , buffer, 1024);
+		printf("%s\n",buffer );
 
 		/* Get the next line */
 		line_size = getline(&line_buf, &line_buf_size, fp);
