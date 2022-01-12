@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <assert.h>
 #define PORT 8080
 #define ADD 1
 #define ABS 2
@@ -27,15 +28,64 @@ int get_int(char* str, int start){
     return res;
 }
 
+/* Split string */
+char** str_split(char* a_str, const char a_delim)
+{
+    char** result    = 0;
+    size_t count     = 0;
+    char* tmp        = a_str;
+    char* last_comma = 0;
+    char delim[2];
+    delim[0] = a_delim;
+    delim[1] = 0;
+
+    /* Count how many elements will be extracted */
+    while (*tmp)
+    {
+        if (a_delim == *tmp)
+        {
+            count++;
+            last_comma = tmp;
+        }
+        tmp++;
+    }
+
+    /* Add space for trailing token */
+    count += last_comma < (a_str + strlen(a_str) - 1);
+
+    /* Add space for terminating null string so caller knows where the list of returned strings ends */
+    count++;
+
+    result = malloc(sizeof(char*) * count);
+
+    if (result)
+    {
+        size_t idx  = 0;
+        char* token = strtok(a_str, delim);
+
+        while (token)
+        {
+            assert(idx < count);
+            *(result + idx++) = strdup(token);
+            token = strtok(0, delim);
+        }
+        assert(idx == count - 1);
+        *(result + idx) = 0;
+    }
+
+    return result;
+}
+
 int main(int argc, char const *argv[])
 {
-	int server_fd, new_socket, valread;
+	int server_fd, new_socket, valread, a, b;
 	struct sockaddr_in address;
 	int opt = 1;
 	int addrlen = sizeof(address);
 	char buffer[1024] = {0};
 	char *hello = "Hello\n";
-    char *del;
+    char *del, *returnValue;
+	char** tokens;
 
 	// Creating socket file descriptor
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
@@ -79,14 +129,22 @@ int main(int argc, char const *argv[])
 		
 		if (valread >= 0)
 		{
-			printf("receive: %s\n",buffer);
+			printf("receive: %s\n", buffer);
 
 			if (strlen(buffer) > 0)
 			{
 				if (strncmp("add", buffer, strlen("add")) == 0)
 				{
-					send(new_socket, buffer, strlen(buffer), 0);
-					printf("send: %s\n", buffer);
+					tokens = str_split(buffer, ' ');
+					// printf("token1: %s\ntoken2: %s", *(tokens + 1), *(tokens + 2));
+					// printf("token1: %06d\ntoken2: %06d", atoi(*(tokens + 1)), atoi(*(tokens + 2)));
+					a = atoi(*(tokens + 1));
+					b = atoi(*(tokens + 2));
+					returnValue = ((a + b) + '0');
+					printf(returnValue);
+					send(new_socket, returnValue, strlen(returnValue), 0);
+					printf("send: %s\n", returnValue);
+					free(tokens);
 				}
 				else if (strncmp("abs", buffer, strlen("abs")) == 0)
 				{
@@ -120,3 +178,5 @@ int main(int argc, char const *argv[])
 
 	return EXIT_SUCCESS;
 }
+
+// https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
