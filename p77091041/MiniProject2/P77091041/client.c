@@ -73,7 +73,7 @@ int main(int argc, char const *argv[])
 		send(sock, line_buf, strlen(line_buf), 0);
 		valread = read(sock, buffer, 1024);
 		printf("%s",buffer);
-
+		memset(buffer, 0, sizeof buffer);
 		/* Get the next line */
 		line_size = getline(&line_buf, &line_buf_size, fp);
 	}

@@ -84,7 +84,7 @@ int main(int argc, char const *argv[])
 	int addrlen = sizeof(address);
 	char buffer[1024] = {0};
 	char *hello = "Hello\n";
-    char *del, *returnValue;
+    char *returnValue;
 	char** tokens;
 
 	// Creating socket file descriptor
@@ -136,29 +136,45 @@ int main(int argc, char const *argv[])
 				if (strncmp("add", buffer, strlen("add")) == 0)
 				{
 					tokens = str_split(buffer, ' ');
-					// printf("token1: %s\ntoken2: %s", *(tokens + 1), *(tokens + 2));
-					// printf("token1: %06d\ntoken2: %06d", atoi(*(tokens + 1)), atoi(*(tokens + 2)));
 					a = atoi(*(tokens + 1));
 					b = atoi(*(tokens + 2));
-					returnValue = ((a + b) + '0');
-					printf(returnValue);
-					send(new_socket, returnValue, strlen(returnValue), 0);
+					sprintf(returnValue, "%d", a + b);
+
+					send(new_socket, strcat(returnValue, "\n"), strlen(returnValue) + strlen("\n"), 0);
 					printf("send: %s\n", returnValue);
 					free(tokens);
+					// returnValue = NULL;
 				}
 				else if (strncmp("abs", buffer, strlen("abs")) == 0)
 				{
-					send(new_socket, buffer, strlen(buffer), 0);
+					tokens = str_split(buffer, ' ');
+					a = atoi(*(tokens + 1));
+
+					if (a >= 0)
+					{
+						sprintf(returnValue, "%d", a);
+					}
+					else
+					{
+						sprintf(returnValue, "%d", a*(-1));
+					}
+
+					send(new_socket, strcat(returnValue, "\n"), strlen(returnValue) + strlen("\n"), 0);
 					printf("send: %s\n", buffer);
 				}
 				else if (strncmp("mul", buffer, strlen("mul")) == 0)
 				{
-					send(new_socket, buffer, strlen(buffer), 0);
+					tokens = str_split(buffer, ' ');
+					a = atoi(*(tokens + 1));
+					b = atoi(*(tokens + 2));
+					sprintf(returnValue, "%d", a * b);
+
+					send(new_socket, strcat(returnValue, "\n"), strlen(returnValue) + strlen("\n"), 0);
 					printf("send: %s\n", buffer);
 				}
 				else if (strncmp("kill", buffer, strlen("kill")) == 0)
 				{
-					send(new_socket, "\n", strlen("\n"), 0);
+					// send(new_socket, "\n", strlen("\n"), 0);
 					printf("send: %s\n", "Bye");
 					return EXIT_SUCCESS;
 				}
@@ -169,8 +185,8 @@ int main(int argc, char const *argv[])
 				}
 				else
 				{
-					send(new_socket, NULL, 0, 0);
-					printf("send: %s\n", NULL);
+					send(new_socket, "", 0, 0);
+					printf("send: %s\n", "");
 				}
 			}
 		}
