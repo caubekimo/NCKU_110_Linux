@@ -1,4 +1,5 @@
 // Client side C/C++ program to demonstrate Socket programming
+#include <stdlib.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -8,6 +9,7 @@
 #define _GNU_SOURCE
 #define EXIT_FAILURE 1
 #define EXIT_SUCCESS 0
+#define FILENAME "./in"
 
 int main(int argc, char const *argv[])
 {
@@ -16,11 +18,7 @@ int main(int argc, char const *argv[])
 	char *hello = "Hello from client";
 	char buffer[1024] = {0};
 
-    FILE * fp; //讀進來的檔案
-    char * line = NULL; //讀進來的某一行
-    size_t len = 0; //prefix 的長度
-	
-    usleep(500000);
+	usleep(500000);
 
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
@@ -44,53 +42,46 @@ int main(int argc, char const *argv[])
 		return -1;
 	}
 
-	//讀取 in 檔
-	fp = fopen("./in", "r");
+	/* Open the file for reading */
+	char *line_buf = NULL;
+	size_t line_buf_size = 0;
+	int line_count = 0;
+	ssize_t line_size;
+	FILE *fp = fopen(FILENAME, "r");
 
-	//如果沒有這個檔案, 就離開 with error
-    if (fp == NULL)
+	if (!fp)
 	{
-		printf("\nIn file not exists \n");
-		return -1;
+		fprintf(stderr, "Error opening file '%s'\n", FILENAME);
+		return EXIT_FAILURE;
 	}
 
-    while(getline(&line, &len, fp) != -1){
-		printf("line length: %zd\n", strlen(line));
+	/* Get the first line of the file. */
+	line_size = getline(&line_buf, &line_buf_size, fp);
 
-		if (str(line) == "")
-		{
-			// print("kill");
-		}
-		// 呼叫 server
-		else
-		{
-		// 		// if (strncmp("add", read, strlen("add")) == 0)
-		// 		// {
+	/* Loop through until we are done with the file. */
+	while (line_size >= 0)
+	{
+		/* Increment our line count */
+		line_count++;
 
-		// 		// }
-		// 		// else if(strncmp("abs", read, strlen("abs")) == 0)
-		// 		// {
+		/* Call server */
+		// printf("line[%06d]: chars=%06zd, buf size=%06zu, contents: %s", line_count,
+		// 	line_size, line_buf_size, line_buf);
 
-		// 		// }
-		// 		// else if (strncmp("mul", read, strlen("mul")) == 0)
-		// 		// {
+		printf(line_buf);
 
-		// 		// }
-		// 		// else if (strncmp("kill", read, strlen("kill")) == 0)
-		// 		// {
+		/* Get the next line */
+		line_size = getline(&line_buf, &line_buf_size, fp);
+	}
 
-		// 		// }
-		// 		// else
-		// 		// {
-		// 		// 	print()
-		// 		// }
-		}
-    }
+	/* Free the allocated line buffer */
+	free(line_buf);
+	line_buf = NULL;
 
+	/* Close the file now that we are done with it */
 	fclose(fp);
-	free(line)
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 
 // https://riptutorial.com/c/example/8274/get-lines-from-a-file-using-getline--
