@@ -194,5 +194,3 @@ int main(int argc, char const *argv[])
 
 	return EXIT_SUCCESS;
 }
-
-// https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
