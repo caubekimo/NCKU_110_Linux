@@ -23,6 +23,7 @@ int get_int(char* str, int start){
         res *= 10;
         res += (str[i] - '0');
     }
+	
     return res;
 }
 
@@ -44,38 +45,78 @@ int main(int argc, char const *argv[])
 	}
 
 	// Forcefully attaching socket to the port 8080
-	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT,
-												&opt, sizeof(opt)))
+	if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt)))
 	{
 		perror("setsockopt");
 		exit(EXIT_FAILURE);
 	}
+
 	address.sin_family = AF_INET;
 	address.sin_addr.s_addr = INADDR_ANY;
 	address.sin_port = htons( PORT );
 
 	// Forcefully attaching socket to the port 8080
-	if (bind(server_fd, (struct sockaddr *)&address,
-								sizeof(address))<0)
+	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
 		perror("bind failed");
 		exit(EXIT_FAILURE);
 	}
+
 	if (listen(server_fd, 3) < 0)
 	{
 		perror("listen");
 		exit(EXIT_FAILURE);
 	}
-	if ((new_socket = accept(server_fd, (struct sockaddr *)&address,
-					(socklen_t*)&addrlen))<0)
+
+	if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen)) < 0)
 	{
 		perror("accept");
 		exit(EXIT_FAILURE);
 	}
 
-    while(1){
-        // write your code!
+	while(1){
+		valread = read(new_socket, buffer, 1024);
+		
+		if (valread >= 0)
+		{
+			printf("receive: %s\n",buffer);
+
+			if (strlen(buffer) > 0)
+			{
+				if (strncmp("add", buffer, strlen("add")) == 0)
+				{
+					send(new_socket, buffer, strlen(buffer), 0);
+					printf("send: %s\n", buffer);
+				}
+				else if (strncmp("abs", buffer, strlen("abs")) == 0)
+				{
+					send(new_socket, buffer, strlen(buffer), 0);
+					printf("send: %s\n", buffer);
+				}
+				else if (strncmp("mul", buffer, strlen("mul")) == 0)
+				{
+					send(new_socket, buffer, strlen(buffer), 0);
+					printf("send: %s\n", buffer);
+				}
+				else if (strncmp("kill", buffer, strlen("kill")) == 0)
+				{
+					send(new_socket, "\n", strlen("\n"), 0);
+					printf("send: %s\n", "Bye");
+					return EXIT_SUCCESS;
+				}
+				else if (strlen(buffer) > 1)
+				{
+					send(new_socket, "Hello\n", strlen("Hello\n"), 0);
+					printf("send: %s\n", "Hello\n");
+				}
+				else
+				{
+					send(new_socket, NULL, 0, 0);
+					printf("send: %s\n", NULL);
+				}
+			}
+		}
     }
 
-	return 0;
+	return EXIT_SUCCESS;
 }
